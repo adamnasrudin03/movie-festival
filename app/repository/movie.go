@@ -3,7 +3,6 @@ package repository
 import (
 	"adamnasrudin03/movie-festival/app/dto"
 	"adamnasrudin03/movie-festival/app/entity"
-	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -42,8 +41,8 @@ func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (resul
 	var totaldata int64
 	query := repo.DB.WithContext(ctx)
 	if queryparam.Search != "" || len(queryparam.Search) > 0 {
-		queryparam.Search = fmt.Sprintf("%" + queryparam.Search + "%")
-		query = query.Where("title LIKE  = ? OR description LIKE = ? OR artists LIKE = ? OR genres LIKE = ? ",
+		queryparam.Search = "%" + queryparam.Search + "%"
+		query = query.Where("lower(title) LIKE ? OR lower(description) LIKE ? OR lower(artists) LIKE ? OR lower(genres) LIKE ? ",
 			queryparam.Search, queryparam.Search, queryparam.Search, queryparam.Search,
 		)
 	}
