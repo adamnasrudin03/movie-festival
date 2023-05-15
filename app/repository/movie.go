@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type MovieRepository interface {
@@ -77,7 +78,7 @@ func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie
 func (repo *movieRepo) UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie) (result entity.Movie, err error) {
 	query := repo.DB.WithContext(ctx)
 
-	err = query.Model(&result).Where("id=?", ID).Updates(entity.Movie(input)).Error
+	err = query.Clauses(clause.Returning{}).Model(&result).Where("id=?", ID).Updates(entity.Movie(input)).Error
 	if err != nil {
 		log.Printf("[MovieRepository-UpdateByID][%v] error: %+v \n", ID, err)
 		return result, err
