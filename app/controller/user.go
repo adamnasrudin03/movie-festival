@@ -64,6 +64,7 @@ func (c *userController) Register(ctx *gin.Context) {
 	log.UserID = uint64(userID)
 	log.Action = "Create"
 	log.Name = fmt.Sprintf("Register new user, user_id = %v", res.ID)
+	log.TableName = "Users"
 	_, _, _ = c.Log.Create(ctx, log)
 	ctx.JSON(statusHttp, helpers.APIResponse("User registered", statusHttp, res))
 }

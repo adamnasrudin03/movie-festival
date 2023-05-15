@@ -2,11 +2,12 @@ package entity
 
 // Log represents the model for an log
 type Log struct {
-	ID     uint64       `gorm:"primaryKey" json:"id"`
-	Name   string       `gorm:"not null" json:"name"`
-	Action string       `gorm:"not null" json:"action"`
-	UserID uint64       `json:"user_id"`
-	User   UserRelation `gorm:"ForeignKey:UserID" json:"user"`
+	ID        uint64       `gorm:"primaryKey" json:"id"`
+	Name      string       `gorm:"not null" json:"name"`
+	Action    string       `gorm:"not null" json:"action"`
+	TableName string       `json:"table_name"`
+	UserID    uint64       `json:"user_id"`
+	User      UserRelation `gorm:"ForeignKey:UserID" json:"user"`
 	GORMModel
 }
 
