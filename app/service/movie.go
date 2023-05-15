@@ -88,8 +88,8 @@ func (srv *movieSrv) UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpd
 		Genres:      input.Genres,
 	}
 
-	sm, err := srv.MovieRepository.GetByID(ctx, ID)
-	if errors.Is(err, gorm.ErrRecordNotFound) || sm.ID == 0 {
+	temp, err := srv.MovieRepository.GetByID(ctx, ID)
+	if errors.Is(err, gorm.ErrRecordNotFound) || temp.ID == 0 {
 		return result, http.StatusNotFound, err
 	}
 
@@ -107,8 +107,8 @@ func (srv *movieSrv) UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpd
 }
 
 func (srv *movieSrv) DeleteByID(ctx *gin.Context, ID uint64) (statusCode int, err error) {
-	sm, err := srv.MovieRepository.GetByID(ctx, ID)
-	if errors.Is(err, gorm.ErrRecordNotFound) || sm.ID == 0 {
+	temp, err := srv.MovieRepository.GetByID(ctx, ID)
+	if errors.Is(err, gorm.ErrRecordNotFound) || temp.ID == 0 {
 		return http.StatusNotFound, err
 	}
 
