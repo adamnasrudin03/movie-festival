@@ -29,6 +29,7 @@ func NewRoutes(contoller controller.Controllers) routes {
 	v1 := r.router.Group("/api/v1")
 	r.userRouter(v1, contoller.User)
 	r.userRouterAuth(v1, contoller.User)
+	r.logRouter(v1, contoller.Log)
 
 	r.router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, helpers.APIResponse("page not found", http.StatusNotFound, nil))
