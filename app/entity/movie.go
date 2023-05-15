@@ -1,6 +1,6 @@
 package entity
 
-// User represents the model for an user
+// Movie represents the model for an Movie
 type Movie struct {
 	ID          uint64 `gorm:"primaryKey" json:"id"`
 	Title       string `gorm:"not null" json:"title" `
