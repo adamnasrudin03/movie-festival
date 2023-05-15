@@ -42,6 +42,7 @@ func SetupDbConnection() *gorm.DB {
 		db.AutoMigrate(
 			&entity.User{},
 			&entity.Log{},
+			&entity.Movie{},
 		)
 	}
 
