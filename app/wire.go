@@ -10,21 +10,24 @@ import (
 
 func WiringRepository(db *gorm.DB) *repository.Repositories {
 	return &repository.Repositories{
-		User: repository.NewUserRepository(db),
-		Log:  repository.NewLogRepository(db),
+		User:  repository.NewUserRepository(db),
+		Log:   repository.NewLogRepository(db),
+		Movie: repository.NewMovieRepository(db),
 	}
 }
 
 func WiringService(repo *repository.Repositories) *service.Services {
 	return &service.Services{
-		User: service.NewUserService(repo.User),
-		Log:  service.NewLogService(repo.Log),
+		User:  service.NewUserService(repo.User),
+		Log:   service.NewLogService(repo.Log),
+		Movie: service.NewMovieService(repo.Movie),
 	}
 }
 
 func WiringController(srv *service.Services) *controller.Controllers {
 	return &controller.Controllers{
-		User: controller.NewUserController(srv.User, srv.Log),
-		Log:  controller.NewLogController(srv.Log),
+		User:  controller.NewUserController(srv.User, srv.Log),
+		Log:   controller.NewLogController(srv.Log),
+		Movie: controller.NewMovieController(srv.Movie, srv.Log),
 	}
 }
