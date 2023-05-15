@@ -35,7 +35,7 @@ func AuthorizationMustBeAdmin() gin.HandlerFunc {
 		userEmail := userData["email"].(string)
 		user := entity.User{}
 
-		err := db.Select("role").Where("id = ? AND email = ?", userID, userEmail).First(&user).Error
+		err := db.Select("id", "role").Where("id = ? AND email = ?", userID, userEmail).First(&user).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) || user.ID == 0 {
 			c.JSON(http.StatusUnauthorized, helpers.APIResponse("Log in again with registered user", http.StatusUnauthorized, nil))
 			c.Abort()
