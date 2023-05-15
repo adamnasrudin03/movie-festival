@@ -31,6 +31,7 @@ func NewRoutes(contoller controller.Controllers) routes {
 	r.userRouterAuth(v1, contoller.User)
 	r.logRouter(v1, contoller.Log)
 	r.moviesRouter(v1, contoller.Movie)
+	r.genresRouter(v1, contoller.Genre)
 
 	r.router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, helpers.APIResponse("page not found", http.StatusNotFound, nil))
