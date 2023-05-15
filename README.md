@@ -38,3 +38,14 @@ import the file in Postman located at ./movie-festival.postman_collection.json
 3. PosgreSQL
 4. JWT
 5. godotenv
+
+
+##  Other information
+default user admin account :
+
+```
+{
+    "email": "admin@gmail.com",
+    "password": "password123"
+}
+```
