@@ -72,6 +72,19 @@ func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie
 		return result, err
 	}
 
+	query = query.Begin()
+	err = query.Clauses(clause.Returning{}).Model(&result).Where("id = ?", ID).Updates(entity.Movie{Viewers: result.Viewers + 1}).Error
+	if err != nil {
+		log.Printf("[MovieRepository-GetByID][%v] error update viewers: %+v \n", ID, err)
+		query.Rollback()
+		return result, err
+	}
+
+	if err = query.Commit().Error; err != nil {
+		log.Printf("[MovieRepository-GetByID][%v] error: %+v \n", ID, err)
+		return result, err
+	}
+
 	return result, err
 }
 
