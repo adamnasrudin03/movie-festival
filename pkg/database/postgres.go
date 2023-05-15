@@ -6,6 +6,7 @@ import (
 
 	"adamnasrudin03/movie-festival/app/configs"
 	"adamnasrudin03/movie-festival/app/entity"
+	"adamnasrudin03/movie-festival/pkg/seeders"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -42,6 +43,10 @@ func SetupDbConnection() *gorm.DB {
 			&entity.User{},
 		)
 	}
+
+	go func(db *gorm.DB) {
+		seeders.InitUser(db)
+	}(db)
 
 	log.Println("Connection Database Success!")
 	return db
