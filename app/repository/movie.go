@@ -55,7 +55,7 @@ func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (resul
 	}
 
 	total = uint64(totaldata)
-	err = query.Offset(int(offset)).Limit(int(queryparam.Limit)).Find(&result).Error
+	err = query.Offset(int(offset)).Limit(int(queryparam.Limit)).Order("viewers desc").Find(&result).Error
 	if err != nil {
 		log.Printf("[MovieRepository-GetAll] error get data: %+v \n", err)
 		return
