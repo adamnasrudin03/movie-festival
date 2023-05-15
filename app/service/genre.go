@@ -37,8 +37,13 @@ func (srv *genreSrv) Create(ctx *gin.Context, input dto.CreateUpdateGenre) (resu
 	}
 
 	result, err = srv.GenreRepository.Create(ctx, genre)
-	if err != nil {
+	if err != nil && err.Error() == "duplicated key not allowed" {
 		log.Printf("[GenreService-Create] error create data: %+v \n", err)
+		return result, http.StatusConflict, errors.New("duplicate record name genre")
+	}
+
+	if err != nil {
+		log.Printf("[GenreService-Create] error create data: %+v \n", err.Error())
 		return result, http.StatusInternalServerError, err
 	}
 
@@ -80,6 +85,11 @@ func (srv *genreSrv) UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpd
 	}
 
 	temp, err := srv.GenreRepository.GetByID(ctx, ID)
+	if err != nil && err.Error() == "duplicated key not allowed" {
+		log.Printf("[GenreService-Create] error create data: %+v \n", err)
+		return result, http.StatusConflict, errors.New("duplicate record name genre")
+	}
+
 	if errors.Is(err, gorm.ErrRecordNotFound) || temp.ID == 0 {
 		return result, http.StatusNotFound, err
 	}

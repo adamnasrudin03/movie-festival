@@ -3,9 +3,11 @@ package repository
 import (
 	"adamnasrudin03/movie-festival/app/dto"
 	"adamnasrudin03/movie-festival/app/entity"
+	"errors"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -31,6 +33,13 @@ func NewGenreRepository(db *gorm.DB) GenreRepository {
 func (repo *genreRepo) Create(ctx *gin.Context, input entity.Genre) (res entity.Genre, err error) {
 	if err := repo.DB.Create(&input).Error; err != nil {
 		log.Printf("[GenreRepository-Create] error Create new Genre: %+v \n", err)
+		if pgError := err.(*pgconn.PgError); errors.Is(err, pgError) {
+			switch pgError.Code {
+			case "23505":
+				err = errors.New("duplicated key not allowed")
+			}
+		}
+
 		return input, err
 	}
 
@@ -79,6 +88,13 @@ func (repo *genreRepo) UpdateByID(ctx *gin.Context, ID uint64, input entity.Genr
 	err = query.Clauses(clause.Returning{}).Model(&result).Where("id = ?", ID).Updates(entity.Genre(input)).Error
 	if err != nil {
 		log.Printf("[GenreRepository-UpdateByID][%v] error: %+v \n", ID, err)
+		if pgError := err.(*pgconn.PgError); errors.Is(err, pgError) {
+			switch pgError.Code {
+			case "23505":
+				err = errors.New("duplicated key not allowed")
+			}
+		}
+
 		return result, err
 	}
 
