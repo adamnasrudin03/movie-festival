@@ -45,7 +45,8 @@ func (repo *logRepo) GetAll(ctx *gin.Context, userID uint64, queryparam dto.List
 		return
 	}
 	total = uint64(totaldata)
-	err = query.Where("user_id = ? ", userID).Offset(int(offset)).Limit(int(queryparam.Limit)).Preload(clause.Associations).Find(&result).Error
+	err = query.Where("user_id = ? ", userID).Offset(int(offset)).Limit(int(queryparam.Limit)).Preload(clause.Associations).
+		Order("updated_at desc").Find(&result).Error
 	if err != nil {
 		log.Printf("[LogRepository-GetAll] error get data: %+v \n", err)
 		return
