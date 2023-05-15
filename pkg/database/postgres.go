@@ -42,12 +42,14 @@ func SetupDbConnection() *gorm.DB {
 		db.AutoMigrate(
 			&entity.User{},
 			&entity.Log{},
+			&entity.Genre{},
 			&entity.Movie{},
 		)
 	}
 
 	go func(db *gorm.DB) {
 		seeders.InitUser(db)
+		seeders.InitGenre(db)
 	}(db)
 
 	log.Println("Connection Database Success!")
