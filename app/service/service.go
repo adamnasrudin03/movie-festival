@@ -5,4 +5,5 @@ type Services struct {
 	User  UserService
 	Log   LogService
 	Movie MovieService
+	Genre GenreService
 }

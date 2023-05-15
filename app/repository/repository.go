@@ -5,4 +5,5 @@ type Repositories struct {
 	User  UserRepository
 	Log   LogRepository
 	Movie MovieRepository
+	Genre GenreRepository
 }

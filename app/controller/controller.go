@@ -5,4 +5,5 @@ type Controllers struct {
 	User  UserController
 	Log   LogController
 	Movie MovieController
+	Genre GenreController
 }
