@@ -9,6 +9,6 @@ type Movie struct {
 	WatchUrl    string `gorm:"not null" json:"watch_url"`
 	Artists     string `gorm:"not null" json:"artists"`
 	Genres      string `gorm:"not null" json:"genres"`
-	Viewers     uint64 `json:"viewers"`
+	Viewers     uint64 `gorm:"not null;default:0" json:"viewers"`
 	GORMModel
 }
