@@ -11,12 +11,13 @@ import (
 	"adamnasrudin03/movie-festival/app/repository"
 	"adamnasrudin03/movie-festival/pkg/helpers"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type UserService interface {
-	Register(input dto.RegisterReq) (res entity.User, statusCode int, err error)
-	Login(input dto.LoginReq) (res dto.LoginRes, statusCode int, err error)
+	Register(ctx *gin.Context, input dto.RegisterReq) (res entity.User, statusCode int, err error)
+	Login(ctx *gin.Context, input dto.LoginReq) (res dto.LoginRes, statusCode int, err error)
 }
 
 type userService struct {
@@ -29,7 +30,7 @@ func NewUserService(UserRepo repository.UserRepository) UserService {
 	}
 }
 
-func (srv *userService) Register(input dto.RegisterReq) (res entity.User, statusCode int, err error) {
+func (srv *userService) Register(ctx *gin.Context, input dto.RegisterReq) (res entity.User, statusCode int, err error) {
 	user := entity.User{
 		Name:     input.Name,
 		Password: input.Password,
@@ -37,14 +38,14 @@ func (srv *userService) Register(input dto.RegisterReq) (res entity.User, status
 		Role:     input.Role,
 	}
 
-	checkUser, _ := srv.userRepository.GetByEmail(user.Email)
+	checkUser, _ := srv.userRepository.GetByEmail(ctx, user.Email)
 	if checkUser.Email != "" {
 		err = errors.New("email user has be registered")
 		log.Printf("[UserService-Register] error check email: %+v \n", err)
 		return res, http.StatusConflict, err
 	}
 
-	res, err = srv.userRepository.Register(user)
+	res, err = srv.userRepository.Register(ctx, user)
 	if err != nil {
 		log.Printf("[UserService-Register] error create data: %+v \n", err)
 
@@ -60,8 +61,8 @@ func (srv *userService) Register(input dto.RegisterReq) (res entity.User, status
 	return res, http.StatusCreated, err
 }
 
-func (srv *userService) Login(input dto.LoginReq) (res dto.LoginRes, statusCode int, err error) {
-	user, err := srv.userRepository.Login(input)
+func (srv *userService) Login(ctx *gin.Context, input dto.LoginReq) (res dto.LoginRes, statusCode int, err error) {
+	user, err := srv.userRepository.Login(ctx, input)
 	if errors.Is(err, gorm.ErrRecordNotFound) || user.ID == 0 {
 		return res, http.StatusNotFound, err
 	}

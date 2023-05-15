@@ -8,13 +8,14 @@ import (
 	"adamnasrudin03/movie-festival/app/entity"
 	"adamnasrudin03/movie-festival/pkg/helpers"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	Register(input entity.User) (res entity.User, err error)
-	Login(input dto.LoginReq) (res entity.User, er error)
-	GetByEmail(email string) (res entity.User, err error)
+	Register(ctx *gin.Context, input entity.User) (res entity.User, err error)
+	Login(ctx *gin.Context, input dto.LoginReq) (res entity.User, er error)
+	GetByEmail(ctx *gin.Context, email string) (res entity.User, err error)
 }
 
 type userRepo struct {
@@ -27,7 +28,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	}
 }
 
-func (repo *userRepo) Register(input entity.User) (res entity.User, err error) {
+func (repo *userRepo) Register(ctx *gin.Context, input entity.User) (res entity.User, err error) {
 	if err := repo.DB.Create(&input).Error; err != nil {
 		log.Printf("[UserRepository-Register] error register new user: %+v \n", err)
 		return input, err
@@ -36,7 +37,7 @@ func (repo *userRepo) Register(input entity.User) (res entity.User, err error) {
 	return input, err
 }
 
-func (repo *userRepo) Login(input dto.LoginReq) (res entity.User, err error) {
+func (repo *userRepo) Login(ctx *gin.Context, input dto.LoginReq) (res entity.User, err error) {
 	if err = repo.DB.Where("email = ?", input.Email).Take(&res).Error; err != nil {
 		log.Printf("[UserRepository-Login] error login: %+v \n", err)
 		return
@@ -50,7 +51,7 @@ func (repo *userRepo) Login(input dto.LoginReq) (res entity.User, err error) {
 	return
 }
 
-func (repo *userRepo) GetByEmail(email string) (res entity.User, err error) {
+func (repo *userRepo) GetByEmail(ctx *gin.Context, email string) (res entity.User, err error) {
 	if err = repo.DB.Where("email = ?", email).Take(&res).Error; err != nil {
 		log.Printf("[UserRepository-GetByEmail] error : %+v \n", err)
 		return
