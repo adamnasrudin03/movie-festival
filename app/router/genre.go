@@ -12,9 +12,9 @@ func (r routes) genresRouter(rg *gin.RouterGroup, genresController controller.Ge
 	{
 		genres.Use(middlewares.Authentication())
 		genres.POST("/", middlewares.AuthorizationMustBeAdmin(), genresController.CreateGenre)
-		genres.GET("/:id", middlewares.AuthorizationMustBeAdmin(), genresController.GetOne)
+		genres.GET("/:id", genresController.GetOne)
 		genres.PUT("/:id", middlewares.AuthorizationMustBeAdmin(), genresController.UpdateGenre)
 		genres.DELETE("/:id", middlewares.AuthorizationMustBeAdmin(), genresController.DeleteGenre)
-		genres.GET("/", middlewares.AuthorizationMustBeAdmin(), genresController.GetAll)
+		genres.GET("/", genresController.GetAll)
 	}
 }
