@@ -27,7 +27,7 @@ go run main.go
 ##  Testing api with postman
 
 ```
-import the file in Postman located at ./movie-festival.postman_collection
+import the file in Postman located at ./movie-festival.postman_collection.json
 ```
 
 

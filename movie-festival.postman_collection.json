@@ -1,0 +1,465 @@
+{
+	"info": {
+		"_postman_id": "edc9e43e-1026-485b-89b5-e0664ae3c433",
+		"name": "movie-festival",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10619265"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Adam\",\r\n    \"email\": \"adam@gmail.com\",\r\n    \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/auth/sign-up",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"auth",
+								"sign-up"
+							]
+						},
+						"description": "Register new user, Role = USER"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/auth/sign-in",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"auth",
+								"sign-in"
+							]
+						},
+						"description": "Login"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Adam admin 2\",\r\n    \"email\": \"admin2@gmail.com\",\r\n    \"role\": \"ADMIN\",\r\n    \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/auth-admin/sign-up",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"auth-admin",
+								"sign-up"
+							]
+						},
+						"description": "Register new user, custom user role ADMIN or USER"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Log",
+			"item": [
+				{
+					"name": "Get All",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base-url}}/log?page=1&limit=10",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"log"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "List logging user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Movie",
+			"item": [
+				{
+					"name": "Get All",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base-url}}/movies?page=1&limit=10",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"movies"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "pelangi",
+									"disabled": true
+								}
+							]
+						},
+						"description": "StartFragment\n\nAPI to list all movies with pagination and search"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Laskar Pelangi\",\r\n    \"description\": \"ebuah film drama Indonesia tahun 2008 yang disutradarai oleh Riri Riza dari skenario yang ditulis oleh Salman Aristo bersama Riri dan Mira Lesmana berdasarkan novel berjudul sama karya Andrea Hirata. Film ini diproduksi oleh Miles Films bersama Mizan Productions dan SinemArt.\",\r\n    \"duration\": 125,\r\n    \"watch_url\": \"url file\",\r\n    \"artists\": \"Cut Mini, Ikranagara, Slamet Rahardjo Djarot, Mathias Muchus,Teuku Rifnu Wikana\",\r\n    \"genres\": \"Drama, Romance\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/movies",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"movies"
+							]
+						},
+						"description": "API to create movie"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Laskar Pelangi Updated\",\r\n    \"description\": \"ebuah film drama Indonesia tahun 2008 yang disutradarai oleh Riri Riza dari skenario yang ditulis oleh Salman Aristo bersama Riri dan Mira Lesmana berdasarkan novel berjudul sama karya Andrea Hirata. Film ini diproduksi oleh Miles Films bersama Mizan Productions dan SinemArt.\",\r\n    \"duration\": 125,\r\n    \"watch_url\": \"url file\",\r\n    \"artists\": \"Cut Mini, Ikranagara, Slamet Rahardjo Djarot, Mathias Muchus,Teuku Rifnu Wikana\",\r\n    \"genres\": \"Drama, Romance\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/movies/1",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"movies",
+								"1"
+							]
+						},
+						"description": "API to Update movie with id"
+					},
+					"response": []
+				},
+				{
+					"name": "Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base-url}}/movies/1",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"movies",
+								"1"
+							]
+						},
+						"description": "API to detail movie with id"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Genre",
+			"item": [
+				{
+					"name": "Get All",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base-url}}/genres?page=1&limit=10",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"genres"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "Action",
+									"disabled": true
+								}
+							]
+						},
+						"description": "StartFragment\n\nAPI to list all genres with pagination and search"
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Romance\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/genres",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"genres"
+							]
+						},
+						"description": "API to create genre"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Romance\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base-url}}/genres/1",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"genres",
+								"1"
+							]
+						},
+						"description": "API to Update genres with id"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base-url",
+			"value": "http://localhost:8000/api/v1/",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlkIjozLCJuYW1lIjoiQWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.KJiJyD_QFqUCDLZg08OpKaAwCcu4qYxmJpssjBeCVbI",
+			"type": "string"
+		}
+	]
+}
