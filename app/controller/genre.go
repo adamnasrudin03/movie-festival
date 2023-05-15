@@ -21,6 +21,7 @@ type GenreController interface {
 	GetAll(ctx *gin.Context)
 	GetOne(ctx *gin.Context)
 	UpdateGenre(ctx *gin.Context)
+	DeleteGenre(ctx *gin.Context)
 }
 
 type GenreHandler struct {
@@ -194,4 +195,36 @@ func (c *GenreHandler) UpdateGenre(ctx *gin.Context) {
 	}(ctx, logging)
 
 	ctx.JSON(statusHttp, helpers.APIResponse("Genre updated", statusHttp, res))
+}
+
+func (c *GenreHandler) DeleteGenre(ctx *gin.Context) {
+	var (
+		logging entity.Log
+	)
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	userID := uint(userData["id"].(float64))
+
+	ID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		err = errors.New("invalid parameter id")
+		ctx.JSON(http.StatusBadRequest, helpers.APIResponse(err.Error(), http.StatusBadRequest, nil))
+		return
+	}
+
+	statusHttp, err := c.Service.DeleteByID(ctx, ID)
+	if err != nil {
+		ctx.JSON(statusHttp, helpers.APIResponse(err.Error(), statusHttp, nil))
+		return
+	}
+
+	logging.UserID = uint64(userID)
+	logging.Action = "Delete"
+	logging.Name = fmt.Sprintf("Delete Genre by id = %v", ID)
+	logging.TableName = "Genres"
+	logging.TableNameID = ID
+	go func(ctx *gin.Context, logging entity.Log) {
+		_, _, _ = c.Log.Create(ctx, logging)
+	}(ctx, logging)
+
+	ctx.JSON(statusHttp, helpers.APIResponse("Delete Genre", statusHttp, nil))
 }
