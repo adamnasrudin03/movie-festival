@@ -28,10 +28,10 @@ type MovieHandler struct {
 	Log     service.LogService
 }
 
-func NewMovieController(srv service.Services) MovieController {
+func NewMovieController(srv service.MovieService, logSrv service.LogService) MovieController {
 	return &MovieHandler{
-		Service: srv.Movie,
-		Log:     srv.Log,
+		Service: srv,
+		Log:     logSrv,
 	}
 }
 
@@ -40,7 +40,6 @@ func (c *MovieHandler) CreateMovie(ctx *gin.Context) {
 		input   dto.CreateUpdateMovie
 		logging entity.Log
 	)
-
 	userData := ctx.MustGet("userData").(jwt.MapClaims)
 	userID := uint(userData["id"].(float64))
 	validate := validator.New()
@@ -104,7 +103,7 @@ func (c *MovieHandler) GetAll(ctx *gin.Context) {
 	param := dto.ListParam{
 		Page:   paramPage,
 		Limit:  paramLimit,
-		Search: strings.TrimSpace(ctx.Query("search")),
+		Search: strings.ToLower(strings.TrimSpace(ctx.Query("search"))),
 	}
 
 	res, statusHttp, err := c.Service.GetAll(ctx, param)
