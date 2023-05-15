@@ -68,6 +68,7 @@ func (c *MovieHandler) CreateMovie(ctx *gin.Context) {
 	logging.Action = "Create"
 	logging.Name = fmt.Sprintf("Create new movie, id = %v", res.ID)
 	logging.TableName = "Movies"
+	logging.TableNameID = res.ID
 	go func(ctx *gin.Context, logging entity.Log) {
 		_, _, _ = c.Log.Create(ctx, logging)
 	}(ctx, logging)
@@ -139,6 +140,7 @@ func (c *MovieHandler) GetOne(ctx *gin.Context) {
 	logging.Action = "Get Detail"
 	logging.Name = fmt.Sprintf("Get detail movie by id = %v", res.ID)
 	logging.TableName = "Movies"
+	logging.TableNameID = res.ID
 	go func(ctx *gin.Context, logging entity.Log) {
 		_, _, _ = c.Log.Create(ctx, logging)
 	}(ctx, logging)
@@ -186,6 +188,7 @@ func (c *MovieHandler) UpdateMovie(ctx *gin.Context) {
 	logging.Action = "Update"
 	logging.Name = fmt.Sprintf("Update movie by id = %v", res.ID)
 	logging.TableName = "Movies"
+	logging.TableNameID = res.ID
 	go func(ctx *gin.Context, logging entity.Log) {
 		_, _, _ = c.Log.Create(ctx, logging)
 	}(ctx, logging)
