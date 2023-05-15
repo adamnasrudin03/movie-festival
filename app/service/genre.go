@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,7 +34,7 @@ func NewGenreService(GenreRepo repository.GenreRepository) GenreService {
 
 func (srv *genreSrv) Create(ctx *gin.Context, input dto.CreateUpdateGenre) (result entity.Genre, statusCode int, err error) {
 	genre := entity.Genre{
-		Name: input.Name,
+		Name: strings.TrimSpace(input.Name),
 	}
 
 	result, err = srv.GenreRepository.Create(ctx, genre)
@@ -81,7 +82,7 @@ func (srv *genreSrv) GetByID(ctx *gin.Context, ID uint64) (result entity.Genre, 
 
 func (srv *genreSrv) UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateGenre) (result entity.Genre, statusCode int, err error) {
 	genre := entity.Genre{
-		Name: input.Name,
+		Name: strings.TrimSpace(input.Name),
 	}
 
 	temp, err := srv.GenreRepository.GetByID(ctx, ID)
