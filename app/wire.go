@@ -11,17 +11,20 @@ import (
 func WiringRepository(db *gorm.DB) *repository.Repositories {
 	return &repository.Repositories{
 		User: repository.NewUserRepository(db),
+		Log:  repository.NewLogRepository(db),
 	}
 }
 
 func WiringService(repo *repository.Repositories) *service.Services {
 	return &service.Services{
 		User: service.NewUserService(repo.User),
+		Log:  service.NewLogService(repo.Log),
 	}
 }
 
 func WiringController(srv *service.Services) *controller.Controllers {
 	return &controller.Controllers{
-		User: controller.NewUserController(srv.User),
+		User: controller.NewUserController(srv.User, srv.Log),
+		Log:  controller.NewLogController(srv.Log),
 	}
 }
