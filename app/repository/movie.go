@@ -5,6 +5,7 @@ import (
 	"adamnasrudin03/movie-festival/app/entity"
 	"errors"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -46,7 +47,7 @@ func (repo *movieRepo) Create(ctx *gin.Context, input entity.Movie, inputGenres 
 		}
 		genresArray = append(genresArray, genre.Name)
 	}
-
+	sort.Strings(genresArray)
 	input.Genres = strings.Join(genresArray, ", ")
 
 	// Create to table movies
@@ -146,6 +147,9 @@ func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (resul
 			return
 		}
 
+		sort.SliceStable(genreMovies, func(i, j int) bool {
+			return genreMovies[i].Name < genreMovies[j].Name
+		})
 		temp.GenreDetails = genreMovies
 		result = append(result, temp)
 	}
@@ -187,6 +191,10 @@ func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result dto.MovieRes
 		genresArray = append(genresArray, v.Name)
 	}
 
+	sort.SliceStable(genreMovies, func(i, j int) bool {
+		return genreMovies[i].Name < genreMovies[j].Name
+	})
+	sort.Strings(genresArray)
 	genreStrings := strings.Join(genresArray, ", ")
 	// if input update genre movies not match in record genre movies
 	if temp.Genres != genreStrings {
@@ -277,6 +285,7 @@ func (repo *movieRepo) UpdateByID(ctx *gin.Context, ID uint64, input entity.Movi
 		genresArray = append(genresArray, genre.Name)
 	}
 
+	sort.Strings(genresArray)
 	genreStrings := strings.Join(genresArray, ", ")
 
 	// if input update genre movies not match in record genre movies
