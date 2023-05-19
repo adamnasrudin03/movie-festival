@@ -181,6 +181,25 @@ func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result dto.MovieRes
 		return result, err
 	}
 
+	// check to table genres
+	var genresArray []string
+	for _, v := range genreMovies {
+		genresArray = append(genresArray, v.Name)
+	}
+
+	genreStrings := strings.Join(genresArray, ", ")
+	// if input update genre movies not match in record genre movies
+	if temp.Genres != genreStrings {
+		// Update genres text
+		err = query.Clauses(clause.Returning{}).Model(&temp).Where("id=?", ID).Updates(entity.Movie{Genres: genreStrings}).Error
+		if err != nil {
+			log.Printf("[MovieRepository-GetByID][%v] error update genres in table movies: %+v \n", ID, err)
+			query.Rollback()
+			return result, err
+		}
+		temp.Genres = genreStrings
+	}
+
 	if err = query.Commit().Error; err != nil {
 		log.Printf("[MovieRepository-GetByID][%v] error: %+v \n", ID, err)
 		return result, err
