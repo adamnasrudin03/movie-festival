@@ -2,6 +2,7 @@ package router
 
 import (
 	"adamnasrudin03/movie-festival/app/controller"
+	"adamnasrudin03/movie-festival/app/middlewares"
 	"adamnasrudin03/movie-festival/pkg/helpers"
 	"net/http"
 
@@ -32,6 +33,10 @@ func NewRoutes(contoller controller.Controllers) routes {
 	r.logRouter(v1, contoller.Log)
 	r.moviesRouter(v1, contoller.Movie)
 	r.genresRouter(v1, contoller.Genre)
+
+	staticFileRoutes := r.router.Group("/file")
+	staticFileRoutes.Use(middlewares.Authentication())
+	staticFileRoutes.StaticFS("/", http.Dir("public"))
 
 	r.router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, helpers.APIResponse("page not found", http.StatusNotFound, nil))

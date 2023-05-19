@@ -40,3 +40,7 @@ type GenreRes struct {
 func (MovieRes) TableName() string {
 	return "movies"
 }
+
+type FileRes struct {
+	Path string `json:"path" `
+}

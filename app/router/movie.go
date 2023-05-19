@@ -11,6 +11,7 @@ func (r routes) moviesRouter(rg *gin.RouterGroup, moviesController controller.Mo
 	movies := rg.Group("/movies")
 	{
 		movies.Use(middlewares.Authentication())
+		movies.POST("/upload-file", middlewares.AuthorizationMustBeAdmin(), moviesController.UploadFile)
 		movies.POST("/", middlewares.AuthorizationMustBeAdmin(), moviesController.CreateMovie)
 		movies.GET("/:id", moviesController.GetOne)
 		movies.PUT("/:id", middlewares.AuthorizationMustBeAdmin(), moviesController.UpdateMovie)
