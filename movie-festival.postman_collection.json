@@ -19,7 +19,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Adam\",\r\n    \"email\": \"adam@gmail.com\",\r\n    \"password\": \"password123\"\r\n}",
+							"raw": "{\r\n    \"name\": \"USER Adam\",\r\n    \"email\": \"adam@gmail.com\",\r\n    \"password\": \"password123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -191,7 +191,7 @@
 								},
 								{
 									"key": "search",
-									"value": "pelangi",
+									"value": "crime",
 									"disabled": true
 								}
 							]
@@ -217,7 +217,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"Laskar Pelangi\",\r\n    \"description\": \"ebuah film drama Indonesia tahun 2008 yang disutradarai oleh Riri Riza dari skenario yang ditulis oleh Salman Aristo bersama Riri dan Mira Lesmana berdasarkan novel berjudul sama karya Andrea Hirata. Film ini diproduksi oleh Miles Films bersama Mizan Productions dan SinemArt.\",\r\n    \"duration\": 125,\r\n    \"watch_url\": \"url file\",\r\n    \"artists\": \"Cut Mini, Ikranagara, Slamet Rahardjo Djarot, Mathias Muchus,Teuku Rifnu Wikana\",\r\n    \"genres\": \"Drama, Romance\"\r\n}",
+							"raw": "{\r\n    \"title\": \"Laskar Pelangi\",\r\n    \"description\": \"ebuah film drama Indonesia tahun 2008 yang disutradarai oleh Riri Riza dari skenario yang ditulis oleh Salman Aristo bersama Riri dan Mira Lesmana berdasarkan novel berjudul sama karya Andrea Hirata. Film ini diproduksi oleh Miles Films bersama Mizan Productions dan SinemArt.\",\r\n    \"duration\": 125,\r\n    \"watch_url\": \"url file\",\r\n    \"artists\": \"Cut Mini, Ikranagara, Slamet Rahardjo Djarot, Mathias Muchus,Teuku Rifnu Wikana\",\r\n    \"genres\": [\r\n        {\r\n            \"id\": 1\r\n        },\r\n        {\r\n            \"id\": 2\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -238,6 +238,78 @@
 					"response": []
 				},
 				{
+					"name": "Upload File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "Must be file video",
+									"type": "file",
+									"src": "/C:/Users/adamnasrudin/Downloads/pexels-peggy-anke-10491384-1080x1920-30fps.mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base-url}}/movies/upload-file",
+							"host": [
+								"{{base-url}}"
+							],
+							"path": [
+								"movies",
+								"upload-file"
+							]
+						},
+						"description": "upload file movie, filepath use to create movie record"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/file/uploaded/filename",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"file",
+								"uploaded",
+								"filename"
+							]
+						},
+						"description": "check file"
+					},
+					"response": []
+				},
+				{
 					"name": "Update",
 					"request": {
 						"auth": {
@@ -254,7 +326,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"Laskar Pelangi Updated\",\r\n    \"description\": \"ebuah film drama Indonesia tahun 2008 yang disutradarai oleh Riri Riza dari skenario yang ditulis oleh Salman Aristo bersama Riri dan Mira Lesmana berdasarkan novel berjudul sama karya Andrea Hirata. Film ini diproduksi oleh Miles Films bersama Mizan Productions dan SinemArt.\",\r\n    \"duration\": 125,\r\n    \"watch_url\": \"url file\",\r\n    \"artists\": \"Cut Mini, Ikranagara, Slamet Rahardjo Djarot, Mathias Muchus,Teuku Rifnu Wikana\",\r\n    \"genres\": \"Drama, Romance\"\r\n}",
+							"raw": "{\r\n    \"title\": \"Laskar Pelangi \",\r\n    \"description\": \"ebuah film drama Indonesia tahun 2008 yang disutradarai oleh Riri Riza dari skenario yang ditulis oleh Salman Aristo bersama Riri dan Mira Lesmana berdasarkan novel berjudul sama karya Andrea Hirata. Film ini diproduksi oleh Miles Films bersama Mizan Productions dan SinemArt.\",\r\n    \"duration\": 125,\r\n    \"duration_type\": \"minutes\",\r\n    \"watch_url\": \"url file\",\r\n    \"artists\": \"Cut Mini, Ikranagara, Slamet Rahardjo Djarot, Mathias Muchus,Teuku Rifnu Wikana\",\r\n     \"genres\": [\r\n        {\r\n            \"id\": 3\r\n        },\r\n        {\r\n            \"id\": 5\r\n        },\r\n        {\r\n            \"id\": 7\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -325,7 +397,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base-url}}/genres?page=1&limit=10",
+							"raw": "{{base-url}}/genres?page=1&limit=15",
 							"host": [
 								"{{base-url}}"
 							],
@@ -339,7 +411,7 @@
 								},
 								{
 									"key": "limit",
-									"value": "10"
+									"value": "15"
 								},
 								{
 									"key": "search",
@@ -406,7 +478,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Romance\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Action\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -453,12 +525,12 @@
 	"variable": [
 		{
 			"key": "base-url",
-			"value": "http://localhost:8000/api/v1/",
+			"value": "http://localhost:8000/api/v1",
 			"type": "string"
 		},
 		{
 			"key": "token",
-			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlkIjozLCJuYW1lIjoiQWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.KJiJyD_QFqUCDLZg08OpKaAwCcu4qYxmJpssjBeCVbI",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlkIjoxLCJuYW1lIjoiQWRtaW4iLCJyb2xlIjoiQURNSU4ifQ.tHGhDXpPB2MHtxQXUlb8dx9ng9Kht9IlQBOoNabEdXA",
 			"type": "string"
 		}
 	]
