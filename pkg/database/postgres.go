@@ -44,6 +44,7 @@ func SetupDbConnection() *gorm.DB {
 			&entity.Log{},
 			&entity.Genre{},
 			&entity.Movie{},
+			&entity.GenreMovies{},
 		)
 	}
 
