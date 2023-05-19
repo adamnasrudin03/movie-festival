@@ -3,15 +3,18 @@ package repository
 import (
 	"adamnasrudin03/movie-festival/app/dto"
 	"adamnasrudin03/movie-festival/app/entity"
+	"errors"
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type MovieRepository interface {
-	Create(ctx *gin.Context, input entity.Movie) (res entity.Movie, err error)
+	Create(ctx *gin.Context, input entity.Movie, inputGenres []entity.GenreMovies) (res dto.MovieRes, err error)
 	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []entity.Movie, total uint64, err error)
 	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, err error)
 	UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie) (result entity.Movie, err error)
@@ -28,13 +31,69 @@ func NewMovieRepository(db *gorm.DB) MovieRepository {
 	}
 }
 
-func (repo *movieRepo) Create(ctx *gin.Context, input entity.Movie) (res entity.Movie, err error) {
-	if err := repo.DB.Create(&input).Error; err != nil {
-		log.Printf("[MovieRepository-Create] error Create new Movie: %+v \n", err)
-		return input, err
+func (repo *movieRepo) Create(ctx *gin.Context, input entity.Movie, inputGenres []entity.GenreMovies) (res dto.MovieRes, err error) {
+	query := repo.DB.WithContext(ctx)
+	query = query.Begin()
+
+	var genresArray []string
+	// check to table genres
+	for _, v := range inputGenres {
+		genre := entity.Genre{}
+		if err = query.Where("id = ?", v.GenreID).Take(&genre).Error; err != nil {
+			log.Printf("[MovieRepository-Create][%v] error check record genre: %+v \n", v.GenreID, err)
+			query.Rollback()
+			return res, err
+		}
+		genresArray = append(genresArray, genre.Name)
 	}
 
-	return input, err
+	input.Genres = strings.Join(genresArray, ", ")
+
+	// Create to table movies
+	if err := query.Clauses(clause.Returning{}).Create(&input).Error; err != nil {
+		log.Printf("[MovieRepository-Create] error Create new Movie: %+v \n", err)
+		query.Rollback()
+		return res, err
+	}
+
+	// append data movie_id in genre_movies
+	genreMovies := []entity.GenreMovies{}
+	for _, v := range inputGenres {
+		genreMovies = append(genreMovies, entity.GenreMovies{GenreID: v.GenreID, MovieID: input.ID})
+	}
+
+	if len(genreMovies) > 0 {
+		// create to table genre_movies
+		if err = repo.DB.Create(&genreMovies).Error; err != nil {
+			log.Printf("[MovieRepository-Create] error Create new genre movies: %+v \n", err)
+			query.Rollback()
+
+			if pgError := err.(*pgconn.PgError); errors.Is(err, pgError) {
+				switch pgError.Code {
+				case "23505":
+					err = errors.New("duplicated key not allowed")
+				}
+			}
+			return res, err
+		}
+	}
+
+	query.Commit()
+	res = dto.MovieRes{
+		ID:           input.ID,
+		Title:        input.Title,
+		Description:  input.Description,
+		Duration:     input.Duration,
+		DurationType: input.DurationType,
+		WatchUrl:     input.WatchUrl,
+		Artists:      input.Artists,
+		Genres:       input.Genres,
+		Viewers:      input.Viewers,
+		CreatedAt:    input.CreatedAt,
+		UpdatedAt:    input.UpdatedAt,
+	}
+
+	return res, err
 }
 
 func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []entity.Movie, total uint64, err error) {

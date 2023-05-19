@@ -14,7 +14,7 @@ import (
 )
 
 type MovieService interface {
-	Create(ctx *gin.Context, input dto.CreateUpdateMovie) (result entity.Movie, statusCode int, err error)
+	Create(ctx *gin.Context, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error)
 	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result dto.ResponseList, statusCode int, err error)
 	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, statusCode int, err error)
 	UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateMovie) (result entity.Movie, statusCode int, err error)
@@ -31,16 +31,30 @@ func NewMovieService(MovieRepo repository.MovieRepository) MovieService {
 	}
 }
 
-func (srv *movieSrv) Create(ctx *gin.Context, input dto.CreateUpdateMovie) (result entity.Movie, statusCode int, err error) {
-	movie := entity.Movie{
-		Title:       input.Title,
-		Duration:    input.Duration,
-		Description: input.Description,
-		WatchUrl:    input.WatchUrl,
-		Artists:     input.Artists,
-		Genres:      input.Genres,
+func (srv *movieSrv) Create(ctx *gin.Context, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error) {
+	genres := []entity.GenreMovies{}
+	for _, v := range input.Genres {
+		genres = append(genres, entity.GenreMovies{GenreID: v.ID})
 	}
-	result, err = srv.MovieRepository.Create(ctx, movie)
+	movie := entity.Movie{
+		Title:        input.Title,
+		Duration:     input.Duration,
+		DurationType: input.DurationType,
+		Description:  input.Description,
+		WatchUrl:     input.WatchUrl,
+		Artists:      input.Artists,
+	}
+	result, err = srv.MovieRepository.Create(ctx, movie, genres)
+	if err != nil && err.Error() == "duplicated key not allowed" {
+		log.Printf("[MovieService-Create] error create data: %+v \n", err)
+		return result, http.StatusConflict, errors.New("duplicate record genres")
+	}
+
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("[MovieService-Create] error create data: %+v \n", err)
+		return result, http.StatusNotFound, errors.New("genre movies not found")
+	}
+
 	if err != nil {
 		log.Printf("[MovieService-Create] error create data: %+v \n", err)
 		return result, http.StatusInternalServerError, err
