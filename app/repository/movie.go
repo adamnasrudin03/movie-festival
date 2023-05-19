@@ -16,7 +16,7 @@ import (
 type MovieRepository interface {
 	Create(ctx *gin.Context, input entity.Movie, inputGenres []entity.GenreMovies) (res dto.MovieRes, err error)
 	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []dto.MovieRes, total uint64, err error)
-	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, err error)
+	GetByID(ctx *gin.Context, ID uint64) (result dto.MovieRes, err error)
 	UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie, inputGenres []entity.GenreMovies) (result dto.MovieRes, err error)
 	DeleteByID(ctx *gin.Context, ID uint64) (err error)
 }
@@ -153,18 +153,30 @@ func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (resul
 	return
 }
 
-func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, err error) {
+func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result dto.MovieRes, err error) {
+	temp := entity.Movie{}
 	query := repo.DB.WithContext(ctx)
+	query = query.Begin()
 
-	if err = query.Where("id = ?", ID).Take(&result).Error; err != nil {
+	if err = query.Where("id = ?", ID).Take(&temp).Error; err != nil {
 		log.Printf("[MovieRepository-GetByID][%v] error: %+v \n", ID, err)
 		return result, err
 	}
 
-	query = query.Begin()
-	err = query.Clauses(clause.Returning{}).Model(&result).Where("id = ?", ID).Updates(entity.Movie{Viewers: result.Viewers + 1}).Error
+	err = query.Clauses(clause.Returning{}).Model(&temp).Where("id = ?", ID).Updates(entity.Movie{Viewers: temp.Viewers + 1}).Error
 	if err != nil {
 		log.Printf("[MovieRepository-GetByID][%v] error update viewers: %+v \n", ID, err)
+		query.Rollback()
+		return result, err
+	}
+
+	genreMovies := []dto.GenreRes{}
+	err = query.
+		Raw("SELECT genres.id, genres.name FROM genre_movies "+
+			"INNER JOIN genres ON genres.id = genre_movies.genre_id  WHERE genre_movies.movie_id = ?", ID).
+		Scan(&genreMovies).Error
+	if err != nil {
+		log.Printf("[MovieRepository-GetByID][%v]  error get data genres by movie_id: %+v \n", ID, err)
 		query.Rollback()
 		return result, err
 	}
@@ -172,6 +184,21 @@ func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie
 	if err = query.Commit().Error; err != nil {
 		log.Printf("[MovieRepository-GetByID][%v] error: %+v \n", ID, err)
 		return result, err
+	}
+
+	result = dto.MovieRes{
+		ID:           temp.ID,
+		Title:        temp.Title,
+		Description:  temp.Description,
+		Duration:     temp.Duration,
+		DurationType: temp.DurationType,
+		Artists:      temp.Artists,
+		Genres:       temp.Genres,
+		GenreDetails: genreMovies,
+		Viewers:      temp.Viewers,
+		WatchUrl:     temp.WatchUrl,
+		CreatedAt:    temp.CreatedAt,
+		UpdatedAt:    temp.UpdatedAt,
 	}
 
 	return result, err

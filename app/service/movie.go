@@ -16,7 +16,7 @@ import (
 type MovieService interface {
 	Create(ctx *gin.Context, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error)
 	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result dto.ResponseList, statusCode int, err error)
-	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, statusCode int, err error)
+	GetByID(ctx *gin.Context, ID uint64) (result dto.MovieRes, statusCode int, err error)
 	UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error)
 	DeleteByID(ctx *gin.Context, ID uint64) (statusCode int, err error)
 }
@@ -78,7 +78,7 @@ func (srv *movieSrv) GetAll(ctx *gin.Context, queryparam dto.ListParam) (result 
 	return result, http.StatusOK, nil
 }
 
-func (srv *movieSrv) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, statusCode int, err error) {
+func (srv *movieSrv) GetByID(ctx *gin.Context, ID uint64) (result dto.MovieRes, statusCode int, err error) {
 	result, err = srv.MovieRepository.GetByID(ctx, ID)
 	if errors.Is(err, gorm.ErrRecordNotFound) || result.ID == 0 {
 		return result, http.StatusNotFound, err
