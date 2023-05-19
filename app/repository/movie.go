@@ -15,7 +15,7 @@ import (
 
 type MovieRepository interface {
 	Create(ctx *gin.Context, input entity.Movie, inputGenres []entity.GenreMovies) (res dto.MovieRes, err error)
-	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []entity.Movie, total uint64, err error)
+	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []dto.MovieRes, total uint64, err error)
 	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, err error)
 	UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie, inputGenres []entity.GenreMovies) (result dto.MovieRes, err error)
 	DeleteByID(ctx *gin.Context, ID uint64) (err error)
@@ -96,7 +96,7 @@ func (repo *movieRepo) Create(ctx *gin.Context, input entity.Movie, inputGenres 
 	return res, err
 }
 
-func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []entity.Movie, total uint64, err error) {
+func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []dto.MovieRes, total uint64, err error) {
 	offset := queryparam.Limit * (queryparam.Page - 1)
 	var totaldata int64
 	query := repo.DB.WithContext(ctx)
@@ -114,10 +114,40 @@ func (repo *movieRepo) GetAll(ctx *gin.Context, queryparam dto.ListParam) (resul
 	}
 
 	total = uint64(totaldata)
-	err = query.Offset(int(offset)).Limit(int(queryparam.Limit)).Order("viewers desc").Find(&result).Error
+	movies := []entity.Movie{}
+	err = query.Offset(int(offset)).Limit(int(queryparam.Limit)).Order("viewers desc").Find(&movies).Error
 	if err != nil {
 		log.Printf("[MovieRepository-GetAll] error get data: %+v \n", err)
 		return
+	}
+
+	for _, v := range movies {
+		genreMovies := []dto.GenreRes{}
+		temp := dto.MovieRes{
+			ID:           v.ID,
+			Title:        v.Title,
+			Description:  v.Description,
+			Duration:     v.Duration,
+			DurationType: v.DurationType,
+			Artists:      v.Artists,
+			Genres:       v.Genres,
+			Viewers:      v.Viewers,
+			WatchUrl:     v.WatchUrl,
+			CreatedAt:    v.CreatedAt,
+			UpdatedAt:    v.UpdatedAt,
+		}
+		err = query.
+			Raw("SELECT genres.id , genres.name FROM genre_movies "+
+				" INNER JOIN genres ON genres.id = genre_movies.genre_id "+
+				" WHERE genre_movies.movie_id = ?", v.ID).
+			Scan(&genreMovies).Error
+		if err != nil {
+			log.Printf("[MovieRepository-GetAll] error get data: %+v \n", err)
+			return
+		}
+
+		temp.GenreDetails = genreMovies
+		result = append(result, temp)
 	}
 
 	return
