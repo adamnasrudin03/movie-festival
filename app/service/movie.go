@@ -17,7 +17,7 @@ type MovieService interface {
 	Create(ctx *gin.Context, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error)
 	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result dto.ResponseList, statusCode int, err error)
 	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, statusCode int, err error)
-	UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateMovie) (result entity.Movie, statusCode int, err error)
+	UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error)
 	DeleteByID(ctx *gin.Context, ID uint64) (statusCode int, err error)
 }
 
@@ -92,26 +92,39 @@ func (srv *movieSrv) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, 
 	return result, http.StatusOK, nil
 }
 
-func (srv *movieSrv) UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateMovie) (result entity.Movie, statusCode int, err error) {
+func (srv *movieSrv) UpdateByID(ctx *gin.Context, ID uint64, input dto.CreateUpdateMovie) (result dto.MovieRes, statusCode int, err error) {
 	movie := entity.Movie{
-		Title:       input.Title,
-		Duration:    input.Duration,
-		Description: input.Description,
-		WatchUrl:    input.WatchUrl,
-		Artists:     input.Artists,
-		Genres:      input.Genres,
+		Title:        input.Title,
+		Duration:     input.Duration,
+		DurationType: input.DurationType,
+		Description:  input.Description,
+		WatchUrl:     input.WatchUrl,
+		Artists:      input.Artists,
 	}
 
-	temp, err := srv.MovieRepository.GetByID(ctx, ID)
-	if errors.Is(err, gorm.ErrRecordNotFound) || temp.ID == 0 {
+	genres := []entity.GenreMovies{}
+	if len(input.Genres) > 0 {
+		for _, v := range input.Genres {
+			genres = append(genres, entity.GenreMovies{GenreID: v.ID, MovieID: ID})
+		}
+	}
+
+	result, err = srv.MovieRepository.UpdateByID(ctx, ID, movie, genres)
+	if err != nil && err.Error() == "record genre not found" {
+		log.Printf("[MovieService-UpdateByID] error update data repo: %+v \n", err)
+		return result, http.StatusNotFound, errors.New("genre movies not found")
+	}
+
+	if err != nil && err.Error() == "duplicated key not allowed" {
+		log.Printf("[MovieService-UpdateByID] error update data repo: %+v \n", err)
+		return result, http.StatusConflict, errors.New("duplicate record genres")
+	}
+
+	if errors.Is(err, gorm.ErrRecordNotFound) || result.ID == 0 {
+		log.Printf("[MovieService-UpdateByID] error update data repo: %+v \n", err)
 		return result, http.StatusNotFound, err
 	}
 
-	if err != nil {
-		log.Printf("[MovieService-UpdateByID] error get data repo: %+v \n", err)
-		return result, http.StatusInternalServerError, err
-	}
-	result, err = srv.MovieRepository.UpdateByID(ctx, ID, movie)
 	if err != nil {
 		log.Printf("[MovieService-UpdateByID] error update data repo: %+v \n", err)
 		return result, http.StatusInternalServerError, err

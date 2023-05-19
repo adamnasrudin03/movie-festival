@@ -17,7 +17,7 @@ type MovieRepository interface {
 	Create(ctx *gin.Context, input entity.Movie, inputGenres []entity.GenreMovies) (res dto.MovieRes, err error)
 	GetAll(ctx *gin.Context, queryparam dto.ListParam) (result []entity.Movie, total uint64, err error)
 	GetByID(ctx *gin.Context, ID uint64) (result entity.Movie, err error)
-	UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie) (result entity.Movie, err error)
+	UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie, inputGenres []entity.GenreMovies) (result dto.MovieRes, err error)
 	DeleteByID(ctx *gin.Context, ID uint64) (err error)
 }
 
@@ -147,15 +147,98 @@ func (repo *movieRepo) GetByID(ctx *gin.Context, ID uint64) (result entity.Movie
 	return result, err
 }
 
-func (repo *movieRepo) UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie) (result entity.Movie, err error) {
+func (repo *movieRepo) UpdateByID(ctx *gin.Context, ID uint64, input entity.Movie, inputGenres []entity.GenreMovies) (result dto.MovieRes, err error) {
 	query := repo.DB.WithContext(ctx)
+	temp := entity.Movie{}
+	query = query.Begin()
 
-	err = query.Clauses(clause.Returning{}).Model(&result).Where("id=?", ID).Updates(entity.Movie(input)).Error
-	if err != nil {
-		log.Printf("[MovieRepository-UpdateByID][%v] error: %+v \n", ID, err)
+	if err = query.Where("id = ?", ID).Take(&temp).Error; err != nil {
+		log.Printf("[MovieRepository-UpdateByID][%v] error get by id: %+v \n", ID, err)
 		return result, err
 	}
 
+	err = query.Clauses(clause.Returning{}).Model(&temp).Where("id=?", ID).Updates(entity.Movie(input)).Error
+	if err != nil {
+		log.Printf("[MovieRepository-UpdateByID][%v] error update record movies: %+v \n", ID, err)
+		query.Rollback()
+		return result, err
+	}
+
+	result = dto.MovieRes{
+		ID:           temp.ID,
+		Title:        temp.Title,
+		Description:  temp.Description,
+		Duration:     temp.Duration,
+		DurationType: temp.DurationType,
+		Artists:      temp.Artists,
+		Genres:       temp.Genres,
+		Viewers:      temp.Viewers,
+		WatchUrl:     temp.WatchUrl,
+		CreatedAt:    temp.CreatedAt,
+		UpdatedAt:    temp.UpdatedAt,
+	}
+
+	// If not update genre movies
+	if len(inputGenres) == 0 {
+		query.Commit()
+		return result, err
+	}
+
+	// check to table genres
+	var genresArray []string
+	var resultGenre []dto.GenreRes
+	for _, v := range inputGenres {
+		genre := entity.Genre{}
+		if err = query.Where("id = ?", v.GenreID).Take(&genre).Error; err != nil {
+			log.Printf("[MovieRepository-UpdateByID][%v] error check record genre: %+v \n", v.GenreID, err)
+			query.Rollback()
+			if errors.Is(err, gorm.ErrRecordNotFound) || genre.ID == 0 {
+				err = errors.New("record genre not found")
+			}
+			return result, err
+		}
+		resultGenre = append(resultGenre, dto.GenreRes{ID: v.GenreID, Name: genre.Name})
+		genresArray = append(genresArray, genre.Name)
+	}
+
+	genreStrings := strings.Join(genresArray, ", ")
+
+	// if input update genre movies not match in record genre movies
+	if temp.Genres != genreStrings {
+		// Update genres text
+		err = query.Clauses(clause.Returning{}).Model(&temp).Where("id=?", ID).Updates(entity.Movie{Genres: genreStrings}).Error
+		if err != nil {
+			log.Printf("[MovieRepository-UpdateByID][%v] error update genres in table movies: %+v \n", ID, err)
+			query.Rollback()
+			return result, err
+		}
+
+		// Drop record genere_movies
+		deleteGM := entity.GenreMovies{}
+		if err = query.Where("movie_id = ?", ID).Delete(&deleteGM).Error; err != nil {
+			log.Printf("[MovieRepository-UpdateByID][%v]  error delete record genre_movies: %+v \n", ID, err)
+			query.Rollback()
+			return result, err
+		}
+
+		// create new record to table genre_movies
+		if err = query.Create(&inputGenres).Error; err != nil {
+			log.Printf("[MovieRepository-UpdateByID][%v]  error Create new genre_movies: %+v \n", ID, err)
+			query.Rollback()
+			if pgError := err.(*pgconn.PgError); errors.Is(err, pgError) {
+				switch pgError.Code {
+				case "23505":
+					err = errors.New("duplicated key not allowed")
+				}
+			}
+			return result, err
+		}
+
+		result.GenreDetails = resultGenre
+		result.Genres = genreStrings
+	}
+
+	query.Commit()
 	return result, err
 }
 
